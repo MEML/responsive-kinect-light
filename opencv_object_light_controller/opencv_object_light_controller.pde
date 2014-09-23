@@ -19,10 +19,11 @@ import org.opencv.core.MatOfKeyPoint;
 import org.opencv.features2d.FeatureDetector;
 import org.opencv.features2d.KeyPoint;
 
-
-
+import controlP5.*;
 
 OpenCV opencv;
+
+ControlP5 cp5;
 
 int screen_w = 640;
 int screen_h = 480;
@@ -32,6 +33,19 @@ FeatureDetector detector;
 
 void setup()
 {
+  cp5 = new ControlP5(this);
+
+   int offset = 300;
+   cp5.addSlider("circleThreshold")
+      .setPosition(100,50+offset)
+      .setRange(0,255);
+   cp5.addSlider("erodeLevel")
+      .setPosition(100,75+offset)
+      .setRange(0,10);
+   cp5.addSlider("dilateLevel")
+      .setPosition(100,100+offset)
+      .setRange(0,10);
+  
   size(640, 480);
   
   opencv = new OpenCV(this, 640, 480);
@@ -64,7 +78,9 @@ void setup()
 }
 
 PImage depthImage;
-
+int circleThreshold = 43;
+int erodeLevel = 4;
+int dilateLevel = 2;
 
 void draw()
 {
@@ -81,11 +97,13 @@ void draw()
   opencv.loadImage(depthImage);
     opencv.updateBackground();
   
-  opencv.dilate();
-  opencv.erode();
-  opencv.erode();
-  opencv.erode();
+  for (int i = 0; i < dilateLevel; i++) {
+    opencv.dilate();
+  }
   
+  for (int i = 0; i < erodeLevel; i++) {
+    opencv.erode();
+  }
   
   MatOfKeyPoint points = new MatOfKeyPoint();
   detector.detect(opencv.matGray, points);
@@ -94,7 +112,9 @@ void draw()
   
   println(points.toArray().length);
   for (KeyPoint point : points.toArray()) {
-      ellipse((float)point.pt.x, (float)point.pt.y, point.size, point.size);
+      if (point.size > circleThreshold) {
+        ellipse((float)point.pt.x, (float)point.pt.y, point.size, point.size);
+      }
 //      point((float)point.pt.x, (float)point.pt.y);
       //((float)point.pt.x, (float)point.pt.y);
   }
@@ -115,12 +135,13 @@ void draw()
 //    contour.draw();
   }
   
+  
 }
 
 
 void mousePressed() {
-  ellipse(mouseX, mouseY, 100, 100);
-  System.out.println("{" + mouseX +"," + mouseY+",200,80}");
+//  ellipse(mouseX, mouseY, 100, 100);
+//  System.out.println("{" + mouseX +"," + mouseY+",200,80}");
   
   
 }
